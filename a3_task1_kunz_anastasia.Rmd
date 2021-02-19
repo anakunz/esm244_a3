@@ -1,0 +1,67 @@
+---
+title: "California Oil Spills"
+author: "Anastasia Kunz"
+date: "2/19/2021"
+output: 
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float: true
+    code_folding: hide 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(tmap)
+library(here)
+library(sf)
+library(janitor)
+library(lubridate)
+```
+
+
+```{r}
+# Read in the data:
+oilspill <- read_sf(here("oil_spill_data"),
+                    layer = "Oil_Spill_Incident_Tracking_%5Bds394%5D") %>% 
+  clean_names() %>% 
+  mutate(date = as.Date(dateofinci)) %>% 
+  mutate(date = ymd(date))
+
+counties <- read_sf(here("ca_counties"),
+                    layer = "CA_Counties_TIGER2016") %>% 
+  clean_names() %>% 
+  select(name)
+
+# Check projection
+st_crs(oilspill) # 4326
+
+# Set Counties CRS
+counties <- st_transform(counties, st_crs(oilspill))
+
+
+
+tmap_mode("view")
+
+tm_shape(counties)+
+  tm_polygons()+
+  tm_shape(oilspill)+
+  tm_dots(col = "red", scale = .8)+
+  tm_basemap("Esri.WorldTopoMap")
+
+
+```
+
+
+```{r}
+tmap_mode("plot")
+
+
+
+```
+
+
+
+
+
