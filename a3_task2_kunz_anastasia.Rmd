@@ -1,0 +1,46 @@
+---
+title: "Cetaceans Species Distribution"
+author: "Anastasia Kunz"
+date: "2/21/2021"
+output: 
+  html_document:
+    theme: flatly
+    code_folding: hide 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(raster)
+library(tidyverse)
+library(here)
+library(sf)
+library(fasterize)
+
+```
+
+
+```{r}
+cetaceans <- list.files(path = "ca_cetaceans", full.names = TRUE)
+
+#create a stack of all rasters
+cetaceans_rast <- raster::stack(cetaceans)
+
+# create the vector containing elements to make a matrix
+reclass <- c(0, 0.59, 0, 0.6, 1, 1)
+
+#make the matrix out of the vector
+matrix_reclass <- matrix(reclass, ncol = 3, byrow = TRUE)
+
+#reclassify the rasters in the stack based on the threshold
+presence_rast <- reclassify(cetaceans_rast, matrix_reclass)
+
+# add up all the values from the reclassified rasters into a single raster
+rast_sum <- raster::calc(cetaceans_rast, fun = sum, na.rm = FALSE)
+
+```
+
+
+
+
+
+
