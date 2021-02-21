@@ -27,7 +27,9 @@ oilspill <- read_sf(here("oil_spill_data"),
                     layer = "Oil_Spill_Incident_Tracking_%5Bds394%5D") %>% 
   clean_names() %>% 
   mutate(date = as.Date(dateofinci)) %>% 
-  mutate(date = ymd(date))
+  mutate(date = ymd(date)) %>% 
+  rename(name = localecoun) %>% 
+  select(name, date, inlandmari)
 
 counties <- read_sf(here("ca_counties"),
                     layer = "CA_Counties_TIGER2016") %>% 
@@ -35,7 +37,7 @@ counties <- read_sf(here("ca_counties"),
   select(name)
 
 # Check projection
-st_crs(oilspill) # 4326
+#st_crs(oilspill) # 4326
 
 # Set Counties CRS
 counties <- st_transform(counties, st_crs(oilspill))
@@ -45,17 +47,23 @@ counties <- st_transform(counties, st_crs(oilspill))
 tmap_mode("view")
 
 tm_shape(counties)+
-  tm_polygons()+
+  tm_polygons(alpha = 0.4)+
   tm_shape(oilspill)+
-  tm_dots(col = "red", scale = .8)+
+  tm_dots(col = "red", scale = .8, alpha = 0.6)+
   tm_basemap("Esri.WorldTopoMap")
+  
 
 
 ```
 
 
 ```{r}
-tmap_mode("plot")
+#Need to do the join
+
+ggplot()+
+  geom_sf(data = counties)+
+  geom_sf(data = oilspill, alpha = 0.5)+
+  theme_void()
 
 
 
