@@ -21,6 +21,8 @@ library(fasterize)
 
 ```{r}
 cetaceans <- list.files(path = "ca_cetaceans", full.names = TRUE)
+ca_state <- read_sf(here("California_State_Boundary-shp"),
+                    layer = "f067d2f7-7950-4e16-beba-8972d811599c2020329-1-18infjv.25og")
 
 #create a stack of all rasters
 cetaceans_rast <- raster::stack(cetaceans)
@@ -36,6 +38,9 @@ presence_rast <- reclassify(cetaceans_rast, matrix_reclass)
 
 # add up all the values from the reclassified rasters into a single raster
 rast_sum <- raster::calc(cetaceans_rast, fun = sum, na.rm = FALSE)
+
+ggplot()+
+  geom_sf(ca_state)
 
 ```
 
