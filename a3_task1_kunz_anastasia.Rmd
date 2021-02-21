@@ -5,8 +5,6 @@ date: "2/19/2021"
 output: 
   html_document:
     theme: flatly
-    toc: true
-    toc_float: true
     code_folding: hide 
 ---
 
@@ -18,6 +16,7 @@ library(here)
 library(sf)
 library(janitor)
 library(lubridate)
+library(viridis)
 ```
 
 
@@ -36,13 +35,23 @@ counties <- read_sf(here("ca_counties"),
   clean_names() %>% 
   select(name)
 
+
+```
+
+```{r, include=FALSE}
+
 # Check projection
-#st_crs(oilspill) # 4326
+st_crs(oilspill)
 
 # Set Counties CRS
 counties <- st_transform(counties, st_crs(oilspill))
 
 
+
+```
+
+
+```{r}
 
 tmap_mode("view")
 
@@ -53,17 +62,29 @@ tm_shape(counties)+
   tm_basemap("Esri.WorldTopoMap")
   
 
+```
 
+
+
+
+```{r}
+oil_counties <- counties %>% 
+  st_join(oilspill) %>% 
+  count(name.x, inlandmari) %>% 
+  filter(inlandmari == "Inland")
 ```
 
 
 ```{r}
-#Need to do the join
 
-ggplot()+
-  geom_sf(data = counties)+
-  geom_sf(data = oilspill, alpha = 0.5)+
-  theme_void()
+ggplot(data = oil_counties)+
+  geom_sf(aes(fill = n))+
+  scale_fill_viridis("Number of Oilspills", option = "plasma")+
+  theme_void()+
+  labs(
+    title = "Inland Oilspills in California by County"
+  )
+  
 
 
 
