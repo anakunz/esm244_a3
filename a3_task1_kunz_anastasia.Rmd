@@ -19,6 +19,9 @@ library(lubridate)
 library(viridis)
 ```
 
+## Oil Spills Spatial Exploration
+
+Explore occurrence data for California oil spills in 2008 through the interactive map below.
 
 ```{r}
 # Read in the data:
@@ -75,6 +78,10 @@ oil_counties <- counties %>%
 ```
 
 
+## County Oil Spills Choropleth Map
+
+Some California counties have much higher concentrations of inland oil spills than others. The choropleth map below shows the number of inland oil spills for each California county. 
+
 ```{r}
 
 ggplot()+
@@ -93,6 +100,8 @@ ggplot()+
 ```
 
 
+### Data Citation
 
+California Department of Fish and Game, Office of Spill Prevention and Response. Oil Spill Incident Tracking [ds394] (2008).
 
 
