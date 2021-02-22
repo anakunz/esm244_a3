@@ -77,8 +77,10 @@ oil_counties <- counties %>%
 
 ```{r}
 
-ggplot(data = oil_counties)+
-  geom_sf(aes(fill = n))+
+ggplot()+
+  
+  geom_sf(data = counties)+
+  geom_sf(data = oil_counties, aes(fill = n))+
   scale_fill_viridis("Number of Oilspills", option = "plasma")+
   theme_void()+
   labs(
