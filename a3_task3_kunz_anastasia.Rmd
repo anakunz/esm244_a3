@@ -22,6 +22,9 @@ library(grid)
 
 ## The Odyssey - Robert Fagles Translation
 
+Analysis of Homer's epic tale *The Odyssey*, translated by Robert Fagles.
+
+*The Odyssey* tells the story of Odysseus's ten year voyage home to Ithaca after the Trojan War. It recounts the trials he faces, both natural and divine, that slow his journey home to his wife Penelope and son Telemachus. 
 
 ```{r}
 odyssey_text <- pdf_text("Odyssey.pdf")
@@ -51,19 +54,26 @@ odyssey_tokens <- odyssey_df %>%
   unnest_tokens(word, text_full) %>% 
   select(-odyssey_text)
 
-# take out stop words
 
-odyssey_nonstop <- odyssey_tokens %>% 
-  anti_join(stop_words)
-
-# County by book
-
-odyssey_counts <- odyssey_nonstop %>% 
-  count(word)
 
 ```
 
+```{r, include=FALSE}
+# take out stop words
+odyssey_nonstop <- odyssey_tokens %>% 
+  anti_join(stop_words)
+```
+
+
+## Top 100 Words in The Odyssey
+
+Pictured below: Odysseus sailing along the sea of 100 most used words in *The Odyssey*
+
 ```{r}
+# Count by book
+
+odyssey_counts <- odyssey_nonstop %>% 
+  count(word)
 #create word cloud for whole book top 100 words
 
 odyssey_top100 <- odyssey_counts %>% 
@@ -86,10 +96,17 @@ ggplot(data = odyssey_top100, aes(label = word))+
 
 ## Sentiment Analysis
 
-```{r}
+Journey through the sentiment of *The Odyssey*, experiencing the ups and downs through time along the voyage home (by book).
+
+```{r, include = FALSE}
 # using afinn to track sentiment through "journey"
 odyssey_afin <- odyssey_nonstop %>% 
   inner_join(get_sentiments("afinn"))
+
+```
+
+```{r}
+
 
 afinn_count <- odyssey_afin %>% 
   group_by(book) %>% 
@@ -97,18 +114,16 @@ afinn_count <- odyssey_afin %>%
 
 ggplot(data = afinn_count, aes(x = as.factor(book), y = mean_afinn))+
   geom_col(aes(fill = mean_afinn))+
-  scale_fill_gradient2(low = "indianred", mid = "purple3", high = "navyblue", midpoint = 0,)+
+  scale_fill_gradient2("Afinn Sentiment Value",low = "indianred", mid = "purple3", high = "navyblue", midpoint = 0,)+
   theme_minimal()+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
   labs(
     x = "Book Number",
     y = "Average Afinn Value",
-    title = "Sentiment Value Through Odyssey Journey"
+    title = "Average Sentiment Value Through Odyssey Journey"
   )
 
-
 ```
-
 
 
 
