@@ -125,9 +125,8 @@ ggplot(data = afinn_count, aes(x = as.factor(book), y = mean_afinn))+
 
 ```
 
+## Text Citation
 
+The Odyssey. Trans. Robert Fagles. New York: Viking (1996).
 
-
-
-
-
+Retrieved from: https://www.boyle.kyschools.us/UserFiles/88/The%20Odyssey.pdf
