@@ -1,0 +1,118 @@
+---
+title: "Text Mining Analysis"
+author: "Anastasia Kunz"
+date: "2/22/2021"
+output:
+  html_document:
+    theme: flatly
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidytext)
+library(textdata)
+library(pdftools)
+library(ggwordcloud)
+library(png)
+library(here)
+library(grid)
+```
+
+## The Odyssey - Robert Fagles Translation
+
+
+```{r}
+odyssey_text <- pdf_text("Odyssey.pdf")
+
+# Start tidy format
+
+odyssey_tidy <- data.frame(odyssey_text) %>% 
+  mutate(text_full = str_split(odyssey_text, pattern = "\\n")) %>% 
+  unnest(text_full) %>% 
+  mutate(text_full = str_squish(text_full))
+
+#Make dataframe
+
+odyssey_df <- odyssey_tidy %>% 
+  slice(-(1:5)) %>% 
+  mutate(book = case_when(
+    str_detect(text_full, "Book") ~ text_full,
+    TRUE ~ NA_character_
+  )) %>% 
+  fill(book) %>% 
+  separate(col = book, into = c("bk", "no"), sep = " ") %>% 
+  mutate(book = as.numeric(as.roman(no)))
+
+# Word counts by book
+
+odyssey_tokens <- odyssey_df %>% 
+  unnest_tokens(word, text_full) %>% 
+  select(-odyssey_text)
+
+# take out stop words
+
+odyssey_nonstop <- odyssey_tokens %>% 
+  anti_join(stop_words)
+
+# County by book
+
+odyssey_counts <- odyssey_nonstop %>% 
+  count(word)
+
+```
+
+```{r}
+#create word cloud for whole book top 100 words
+
+odyssey_top100 <- odyssey_counts %>% 
+  arrange(-n) %>% 
+  slice(1:100)
+
+boat <- png::readPNG( "odyssey.png") #read and add png
+
+ggplot(data = odyssey_top100, aes(label = word))+
+  geom_text_wordcloud(aes(color = n, size = n), shape = "square")+
+  scale_size_area(max_size = 6) +
+  scale_color_gradientn(colors = c("royalblue2","cyan4", "turquoise2"))+
+  theme_minimal()+
+  annotation_custom(rasterGrob(boat, width = .1, height = .1),
+                    0, 1.5,0, 1.7)
+
+```
+
+
+
+## Sentiment Analysis
+
+```{r}
+# using afinn to track sentiment through "journey"
+odyssey_afin <- odyssey_nonstop %>% 
+  inner_join(get_sentiments("afinn"))
+
+afinn_count <- odyssey_afin %>% 
+  group_by(book) %>% 
+  summarize(mean_afinn = mean(value))
+
+ggplot(data = afinn_count, aes(x = as.factor(book), y = mean_afinn))+
+  geom_col(aes(fill = mean_afinn))+
+  scale_fill_gradient2(low = "indianred", mid = "purple3", high = "navyblue", midpoint = 0,)+
+  theme_minimal()+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+  labs(
+    x = "Book Number",
+    y = "Average Afinn Value",
+    title = "Sentiment Value Through Odyssey Journey"
+  )
+
+
+```
+
+
+
+
+
+
+
+
