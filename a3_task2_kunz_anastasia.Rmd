@@ -15,14 +15,18 @@ library(tidyverse)
 library(here)
 library(sf)
 library(fasterize)
+library(rnaturalearth)
 
+```
+
+```{r, echo = TRUE, results = "hide"}
+coastline <- ne_download(scale = 50, type = 'land', category = 'physical', returnclass = "sf")
 ```
 
 
 ```{r}
 cetaceans <- list.files(path = "ca_cetaceans", full.names = TRUE)
-ca_state <- read_sf(here("California_State_Boundary-shp"),
-                    layer = "f067d2f7-7950-4e16-beba-8972d811599c2020329-1-18infjv.25og")
+
 
 #create a stack of all rasters
 cetaceans_rast <- raster::stack(cetaceans)
@@ -37,14 +41,29 @@ matrix_reclass <- matrix(reclass, ncol = 3, byrow = TRUE)
 presence_rast <- reclassify(cetaceans_rast, matrix_reclass)
 
 # add up all the values from the reclassified rasters into a single raster
-rast_sum <- raster::calc(cetaceans_rast, fun = sum, na.rm = FALSE)
+rast_sum <- raster::calc(cetaceans_rast, fun = sum, na.rm = TRUE)
 
-ggplot()+
-  geom_sf(ca_state)
+species_sum_df <-  raster::rasterToPoints(rast_sum) %>% 
+  as.data.frame()
+
 
 ```
 
+```{r, fig.cap= ""}
 
+ggplot()+
+  geom_raster(data = species_sum_df, aes(x = x, y = y, fill = layer))+
+  scale_fill_gradient("Species Richness", low = "darkblue", high = "cyan2") +
+  geom_sf(data = coastline, fill = "navajowhite3")+
+  coord_sf(xlim = c(-124.8,-115.5), ylim = c(32,38)) +
+  theme_minimal()+
+  labs(
+    x = " ",
+    y = " ",
+    title = "California Cetaceans Species Richness"
+  )
+  
+```
 
 
 
